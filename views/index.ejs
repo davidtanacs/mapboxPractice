@@ -7,69 +7,9 @@
     <link href='https://api.mapbox.com/mapbox-gl-js/v0.50.0/mapbox-gl.css' rel='stylesheet'/>
     <script src="https://cdn.jsdelivr.net/npm/@turf/turf@5/turf.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <script type="text/javascript" src="/config.js"></script>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-        }
-
-        #map {
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            width: 100%;
-        }
-
-        .listing-group {
-            font: 12px/10px 'Helvetica Neue', Arial, Helvetica, sans-serif;
-            font-weight: 600;
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            z-index: 1;
-            border-radius: 3px;
-            max-width: 20%;
-            color: #fff;
-        }
-
-        .listing-group input[type=checkbox]:first-child + label {
-            border-radius: 3px 3px 0 0;
-        }
-
-        .listing-group label:last-child {
-            border-radius: 0 0 3px 3px;
-            border: none;
-        }
-
-        .listing-group input[type=checkbox] {
-            display: none;
-        }
-
-        .listing-group input[type=checkbox] + label {
-            background-color: #3386c0;
-            display: block;
-            cursor: pointer;
-            padding: 10px;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.25);
-        }
-
-        .listing-group input[type=checkbox] + label {
-            background-color: #3386c0;
-            text-transform: capitalize;
-        }
-
-        .listing-group input[type=checkbox] + label:hover,
-        .listing-group input[type=checkbox]:checked + label {
-            background-color: #4ea0da;
-        }
-
-        .listing-group input[type=checkbox]:checked + label:before {
-            content: '✔';
-            margin-right: 5px;
-        }
-    </style>
-        </head>
+    <script type="text/javascript" src="/config/config.js"></script>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
 <body>
 <div id="map"></div>
 <nav id='listing-group' class='listing-group'></nav>
@@ -154,8 +94,8 @@
                 var properties = geoJson.features[0].properties;
                 var propertyKeys = Object.keys(properties)
                 propertyKeys.forEach(function (propertyKey) {
-                    var label = document.createElement('label');
-                    var input = document.createElement('input');
+                    let label = document.createElement('label');
+                    let input = document.createElement('input');
                     label.innerText = propertyKey;
                     label.setAttribute('for', propertyKey);
                     input.setAttribute('type', 'checkbox');
@@ -209,8 +149,7 @@
                     var clickedPointProperties = e.features[0].properties
                     var description = "<ul>";
                     propertyKeys.forEach(function (propertyKey) {
-                        if (document.getElementById(propertyKey).checked === true){
-                            console.log(clickedPointProperties)
+                        if (document.getElementById(propertyKey).checked === true) {
                             description += "<li>" + propertyKey + ": " + clickedPointProperties[propertyKey] + "</li>"
                         }
                     })
@@ -222,9 +161,7 @@
                 map.on('mouseleave', 'points', function () {
                     map.getCanvas().style.cursor = '';
                     popup.remove();
-
                 });
-
             }
         })
     })
