@@ -1,4 +1,5 @@
 mapboxgl.accessToken = config.mapboxgl_accesstoken;
+
 const map = new mapboxgl.Map({
     container: 'map', // container id
     style: 'mapbox://styles/mapbox/streets-v9', // stylesheet location
@@ -47,16 +48,6 @@ map.on('load', function () {
                     'fill-opacity': 0.5
                 },
                 'filter': ['!in', 'id', ""]
-            });
-            map.addLayer({
-                'id': 'allFeature',
-                'type': 'fill',
-                'source': 'data',
-                'layout': {
-                    'visibility': 'visible'
-                }, 'paint': {
-                    'fill-opacity': 0
-                }
             });
             map.addLayer({
                 'id': 'points',
