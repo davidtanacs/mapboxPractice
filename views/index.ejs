@@ -9,18 +9,70 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script type="text/javascript" src="/config.js"></script>
     <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
         #map {
             position: absolute;
             top: 0;
             bottom: 0;
-            height: 900px;
             width: 100%;
         }
+
+        .listing-group {
+            font: 12px/10px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+            font-weight: 600;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 1;
+            border-radius: 3px;
+            max-width: 20%;
+            color: #fff;
+        }
+
+        .listing-group input[type=checkbox]:first-child + label {
+            border-radius: 3px 3px 0 0;
+        }
+
+        .listing-group label:last-child {
+            border-radius: 0 0 3px 3px;
+            border: none;
+        }
+
+        .listing-group input[type=checkbox] {
+            display: none;
+        }
+
+        .listing-group input[type=checkbox] + label {
+            background-color: #3386c0;
+            display: block;
+            cursor: pointer;
+            padding: 10px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.25);
+        }
+
+        .listing-group input[type=checkbox] + label {
+            background-color: #3386c0;
+            text-transform: capitalize;
+        }
+
+        .listing-group input[type=checkbox] + label:hover,
+        .listing-group input[type=checkbox]:checked + label {
+            background-color: #4ea0da;
+        }
+
+        .listing-group input[type=checkbox]:checked + label:before {
+            content: '✔';
+            margin-right: 5px;
+        }
     </style>
-</head>
+        </head>
 <body>
-<div id="map">
-</div>
+<div id="map"></div>
+<nav id='listing-group' class='listing-group'></nav>
 </body>
 </html>
 
@@ -34,8 +86,6 @@
     });
 
 
-
-
     map.on('load', function () {
         $.ajax({
             type: 'GET',
@@ -44,19 +94,19 @@
                 var cellSide = 3;
                 var hexGrid = turf.hexGrid(turf.bbox(geoJson), cellSide, {});
 
-                for (let i = 0; i < hexGrid.features.length; i++){
+                for (let i = 0; i < hexGrid.features.length; i++) {
                     let ptsWithin = turf.pointsWithinPolygon(geoJson, hexGrid.features[i])
-                    if (ptsWithin.features.length > 0){
-                        for (let j = 0; j < ptsWithin.features.length; j++){
+                    if (ptsWithin.features.length > 0) {
+                        for (let j = 0; j < ptsWithin.features.length; j++) {
                             hexGrid.features[i].properties = {count: ptsWithin.features.length, id: i};
                         }
                     } else {
                         hexGrid.features[i].properties = {count: 0, id: i};
                     }
                 }
-                map.addSource('geojson', { type: 'geojson', data: geoJson })
+                map.addSource('geojson', {type: 'geojson', data: geoJson})
 
-                map.addSource('data', { type: 'geojson', data: hexGrid })
+                map.addSource('data', {type: 'geojson', data: hexGrid})
                 map.addLayer({
                     'id': 'hexagon',
                     'type': 'fill',
@@ -83,7 +133,7 @@
                     'source': 'data',
                     'layout': {
                         'visibility': 'visible'
-                    }, 'paint':  {
+                    }, 'paint': {
                         'fill-opacity': 0
                     }
                 });
@@ -100,6 +150,20 @@
                     },
                     'filter': ['in', 'policyID', ""]
                 });
+                var listingGroup = document.getElementById('listing-group');
+                var properties = Object.keys(geoJson.features[0].properties);
+                properties.forEach(function (propertyKey) {
+                    var label = document.createElement('label');
+                    var input = document.createElement('input');
+                    label.innerText = propertyKey;
+                    label.setAttribute('for', propertyKey);
+                    input.setAttribute('type', 'checkbox');
+                    input.setAttribute('checked', 'checked');
+                    input.setAttribute('id', propertyKey);
+                    listingGroup.appendChild(input);
+                    listingGroup.appendChild(label);
+                })
+
                 map.on('click', function (e) {
                     let width1 = 10;
                     let height1 = 10;
@@ -108,13 +172,13 @@
                             [e.point.x + width1 / 2, e.point.y + height1 / 2]],
                         {layers: ['hexagon']});
 
-                    let hexFilter = selectedHexagon.reduce(function(ids, feature){
+                    let hexFilter = selectedHexagon.reduce(function (ids, feature) {
                         ids.push(feature.properties.id);
                         return ids;
                     }, ['!in', 'id']);
                     var selectedPoints = [];
                     var pointFilter;
-                    if (selectedHexagon.length > 0){
+                    if (selectedHexagon.length > 0) {
                         for (let i = 0; i < selectedHexagon.length; i++) {
                             var pointsInHex = turf.pointsWithinPolygon(geoJson, selectedHexagon[i]);
                             for (let j = 0; j < pointsInHex.features.length; j++) {
@@ -143,9 +207,9 @@
                     var coordinates = e.features[0].geometry.coordinates.slice();
                     var clickedPointProperties = e.features[0].properties
                     var description = "<ul><li>PolicyId: " + clickedPointProperties.policyID + "</li>" +
-                                    "<li>Statecode: " + clickedPointProperties.statecode + "</li>" +
-                                    "<li>County: " + clickedPointProperties.county + "</li>" +
-                                    "<li>tiv 2012: " + clickedPointProperties.tiv_2012 + "</li></ul>"
+                        "<li>Statecode: " + clickedPointProperties.statecode + "</li>" +
+                        "<li>County: " + clickedPointProperties.county + "</li>" +
+                        "<li>tiv 2012: " + clickedPointProperties.tiv_2012 + "</li></ul>"
                     popup.setLngLat(coordinates)
                         .setHTML(description)
                         .addTo(map);
