@@ -29,4 +29,5 @@ Given you have your data represented as a series of Point Features in a GeoJSON,
 
 #### Extra implemented features
 
-- hover over datapoints show a popup with some property of that point
+* Hover over datapoints show a popup with all property of that point
+* Popup shows only the selected properties on the nav bar
