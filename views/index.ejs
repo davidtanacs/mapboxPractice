@@ -151,8 +151,9 @@
                     'filter': ['in', 'policyID', ""]
                 });
                 var listingGroup = document.getElementById('listing-group');
-                var properties = Object.keys(geoJson.features[0].properties);
-                properties.forEach(function (propertyKey) {
+                var properties = geoJson.features[0].properties;
+                var propertyKeys = Object.keys(properties)
+                propertyKeys.forEach(function (propertyKey) {
                     var label = document.createElement('label');
                     var input = document.createElement('input');
                     label.innerText = propertyKey;
@@ -206,10 +207,14 @@
 
                     var coordinates = e.features[0].geometry.coordinates.slice();
                     var clickedPointProperties = e.features[0].properties
-                    var description = "<ul><li>PolicyId: " + clickedPointProperties.policyID + "</li>" +
-                        "<li>Statecode: " + clickedPointProperties.statecode + "</li>" +
-                        "<li>County: " + clickedPointProperties.county + "</li>" +
-                        "<li>tiv 2012: " + clickedPointProperties.tiv_2012 + "</li></ul>"
+                    var description = "<ul>";
+                    propertyKeys.forEach(function (propertyKey) {
+                        if (document.getElementById(propertyKey).checked === true){
+                            console.log(clickedPointProperties)
+                            description += "<li>" + propertyKey + ": " + clickedPointProperties[propertyKey] + "</li>"
+                        }
+                    })
+                    description += "</ul>"
                     popup.setLngLat(coordinates)
                         .setHTML(description)
                         .addTo(map);
