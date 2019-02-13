@@ -100,7 +100,7 @@ jspm_packages/
 # vuepress build output
 .vuepress/dist
 
-public/config.js
+public/config/config.js
 
 data.geojson
 
