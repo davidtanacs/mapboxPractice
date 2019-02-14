@@ -16,19 +16,17 @@ map.on('load', function () {
             var cellSide = 3;
             var hexGrid = turf.hexGrid(turf.bbox(geoJson), cellSide, {});
 
-            for (let i = 0; i < hexGrid.features.length; i++) {
-                let ptsWithin = turf.pointsWithinPolygon(geoJson, hexGrid.features[i])
-                if (ptsWithin.features.length > 0) {
-                    for (let j = 0; j < ptsWithin.features.length; j++) {
-                        hexGrid.features[i].properties = {count: ptsWithin.features.length, id: i};
-                    }
-                } else {
-                    hexGrid.features[i].properties = {count: 0, id: i};
-                }
-            }
-            map.addSource('geojson', {type: 'geojson', data: geoJson})
 
-            map.addSource('data', {type: 'geojson', data: hexGrid})
+            geoJson.features.forEach(function (feature, index) {
+                feature.properties.pointId = index;
+            });
+            for (let i = 0; i < hexGrid.features.length; i++) {
+                let ptsWithin = turf.pointsWithinPolygon(geoJson, hexGrid.features[i]);
+                hexGrid.features[i].properties = {count: ptsWithin.features.length, hexId: i};
+            }
+            map.addSource('geojson', {type: 'geojson', data: geoJson});
+            map.addSource('data', {type: 'geojson', data: hexGrid});
+
             map.addLayer({
                 'id': 'hexagon',
                 'type': 'fill',
@@ -47,7 +45,7 @@ map.on('load', function () {
                     'fill-outline-color': '#161616',
                     'fill-opacity': 0.5
                 },
-                'filter': ['!in', 'id', ""]
+                'filter': ['!in', 'hexId', ""]
             });
             map.addLayer({
                 'id': 'points',
@@ -60,11 +58,11 @@ map.on('load', function () {
                     'circle-color':
                         "#f4e242"
                 },
-                'filter': ['in', 'policyID', ""]
+                'filter': ['in', 'pointId', ""]
             });
             var listingGroup = document.getElementById('listing-group');
             var properties = geoJson.features[0].properties;
-            var propertyKeys = Object.keys(properties)
+            var propertyKeys = Object.keys(properties);
             propertyKeys.forEach(function (propertyKey) {
                 let label = document.createElement('label');
                 let input = document.createElement('input');
@@ -75,7 +73,7 @@ map.on('load', function () {
                 input.setAttribute('id', propertyKey);
                 listingGroup.appendChild(input);
                 listingGroup.appendChild(label);
-            })
+            });
 
             map.on('click', function (e) {
                 let width1 = 10;
@@ -85,10 +83,10 @@ map.on('load', function () {
                         [e.point.x + width1 / 2, e.point.y + height1 / 2]],
                     {layers: ['hexagon']});
 
-                let hexFilter = selectedHexagon.reduce(function (ids, feature) {
-                    ids.push(feature.properties.id);
-                    return ids;
-                }, ['!in', 'id']);
+                let hexFilter = selectedHexagon.reduce(function (hexIds, feature) {
+                    hexIds.push(feature.properties.hexId);
+                    return hexIds;
+                }, ['!in', 'hexId']);
                 var selectedPoints = [];
                 var pointFilter;
                 if (selectedHexagon.length > 0) {
@@ -98,16 +96,16 @@ map.on('load', function () {
                             selectedPoints.push(pointsInHex.features[j]);
                         }
                     }
-                    pointFilter = selectedPoints.reduce(function (ids, feature) {
-                        ids.push(feature.properties.policyID);
-                        return ids;
-                    }, ['in', 'policyID']);
+                    pointFilter = selectedPoints.reduce(function (pointIds, feature) {
+                        pointIds.push(feature.properties.pointId);
+                        return pointIds;
+                    }, ['in', 'pointId']);
                 } else {
-                    pointFilter = ['in', 'policyID', '']
+                    pointFilter = ['in', 'pointId', '']
                 }
                 map.setFilter('hexagon', hexFilter);
                 map.setFilter('points', pointFilter);
-            })
+            });
 
             var popup = new mapboxgl.Popup({
                 closeButton: false,
@@ -118,14 +116,14 @@ map.on('load', function () {
                 map.getCanvas().style.cursor = 'pointer';
 
                 var coordinates = e.features[0].geometry.coordinates.slice();
-                var clickedPointProperties = e.features[0].properties
+                var clickedPointProperties = e.features[0].properties;
                 var description = "<ul>";
                 propertyKeys.forEach(function (propertyKey) {
                     if (document.getElementById(propertyKey).checked === true) {
                         description += "<li>" + propertyKey + ": " + clickedPointProperties[propertyKey] + "</li>"
                     }
-                })
-                description += "</ul>"
+                });
+                description += "</ul>";
                 popup.setLngLat(coordinates)
                     .setHTML(description)
                     .addTo(map);
@@ -136,4 +134,4 @@ map.on('load', function () {
             });
         }
     })
-})
+});
