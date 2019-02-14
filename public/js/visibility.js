@@ -60,20 +60,14 @@ map.on('load', function () {
                 },
                 'filter': ['in', 'pointId', ""]
             });
-            var listingGroup = document.getElementById('listing-group');
+
             var properties = geoJson.features[0].properties;
             var propertyKeys = Object.keys(properties);
             propertyKeys.forEach(function (propertyKey) {
-                let label = document.createElement('label');
-                let input = document.createElement('input');
-                label.innerText = propertyKey;
-                label.setAttribute('for', propertyKey);
-                input.setAttribute('type', 'checkbox');
-                input.setAttribute('checked', 'checked');
-                input.setAttribute('id', propertyKey);
-                listingGroup.appendChild(input);
-                listingGroup.appendChild(label);
+                generateCheckboxWithLabel(propertyKey);
             });
+            generateCheckboxWithLabel('select-all');
+            generateCheckboxWithLabel('select-none');
 
             map.on('click', function (e) {
                 let width1 = 10;
@@ -135,3 +129,41 @@ map.on('load', function () {
         }
     })
 });
+
+function generateCheckboxWithLabel(id) {
+        var listingGroup = document.getElementById('listing-group');
+        let label = document.createElement('label');
+        let input = document.createElement('input');
+        label.innerText = id;
+        label.setAttribute('for', id);
+        input.setAttribute('type', 'checkbox');
+        input.setAttribute('checked', 'checked');
+        input.setAttribute('id', id);
+        if (id === 'select-none'){
+            input.setAttribute('onclick', 'selectNoneOrAll(false, this);');
+        } else if (id === 'select-all'){
+            input.setAttribute('onclick', 'selectNoneOrAll(true, this);');
+        }
+        listingGroup.appendChild(input);
+        listingGroup.appendChild(label);
+}
+
+function selectNoneOrAll(selectSwitch, checkbox) {
+    let checkboxIds = getCheckboxIds();
+    checkboxIds.forEach(function (checkboxId) {
+        let elm = document.getElementById(checkboxId);
+        elm.checked = selectSwitch;
+    });
+    document.getElementById('select-none').checked = !checkbox.checked;
+}
+
+function getCheckboxIds(){
+    var checkboxes = document.getElementById('listing-group').children;
+    var checkboxIds = [];
+    for (let i = 0; i < checkboxes.length; i++) {
+        if (checkboxes[i].id !== "") {
+            checkboxIds.push(checkboxes[i].id)
+        }
+    }
+    return checkboxIds;
+}
